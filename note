@@ -1,0 +1,7 @@
+Une des difficulté a été de ne pas céder à la facilité des fonctionnalités imperative de Ocaml tel que les tableau.
+En effet, le calcul des voisin necessite de passer par des indices qui se marrie mal avec les list.
+De plus niveau complexité un tableau aurais été bien plus efficient 
+de O(nbCell^dimension) pour une liste a O(nbCell) pour un tableau grace a l'acces en temps constant.
+Nous avons choisit de rester bien fonctionnelle avec des listes malgré tout.
+Nous avons perdu beaucoup de temps a essayer de faire des fonction generique sur plusieurs dimensions 
+mais ça n'a pas vraiment fonctionné et nous avons du revenir a des fonction dimension specifique
