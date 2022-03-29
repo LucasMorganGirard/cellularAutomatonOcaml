@@ -9,7 +9,7 @@
    State is an int to allows for a big number of possible state and to facilitate using different alphabet.
    In order to use it in other methods, a tech method to match int to alphabet and alphabet to int is needed.
  *)
-type state = int list;;
+type state = int;;
 
 type alphabet1 = Alive | Dead;;
 type alphabet2 = A | B | C | D | E | F | G | H;;
@@ -97,6 +97,7 @@ let stateOfCoordonate listOfState coordonate =
 (********************************)
 (* 
     tech methods to find 2D neighborhood
+    convert coordonate from single dimension integer to two dimension integer coordonate
 *)
 let flatCoordonateToMatriceCoordonate dimension coordonateFlat =
   match dimension.cellPerSide with
@@ -107,6 +108,9 @@ let flatCoordonateToMatriceCoordonate dimension coordonateFlat =
     end
     | _ -> failwith "Wrong dimension format";;
 
+(*
+    Reverse from flatCoordonateToMatriceCoordonate
+*)
 let matriceCoordonateToFlatCoordonate dimension coordonateMatrice =
   match dimension.cellPerSide with
     | width::height::t -> 
@@ -117,7 +121,9 @@ let matriceCoordonateToFlatCoordonate dimension coordonateMatrice =
     end
     | _ -> failwith "Wrong dimension format";;
 
-
+(*
+    check if matrice coordonate (list of coordinates) is valid for given dimension
+*)
 let coordonateInsideDimension dimension coordonateMatrice =
   match dimension.cellPerSide with
     | width::height::t ->
@@ -133,14 +139,14 @@ let coordonateInsideDimension dimension coordonateMatrice =
     von Neumann neighborhood
     return list of integer coordinates of the neighborhood
 *)
-let noDiagonalNeighbords dimension coordonateFlat = 
+let noDiagonalNeighbords dimension coordonateFlat =
   let north =
     match flatCoordonateToMatriceCoordonate dimension coordonateFlat with 
       | (x::y::[]) ->
       begin
         if  (
               coordonateInsideDimension dimension (x::(y-1)::[])
-            ) 
+            )
         then (matriceCoordonateToFlatCoordonate dimension (x::(y-1)::[]))::[]
         else []
       end
@@ -166,24 +172,73 @@ let noDiagonalNeighbords dimension coordonateFlat =
       if (coordonateInsideDimension dimension (flatCoordonateToMatriceCoordonate dimension (coordonateFlat + 1))) then 
       (coordonateFlat + 1)::[] else [] in north@south@west@est;;
 
+(*
+    Moore neighborhood
+    return list of integer coordinates of the neighborhood
+*)
+let diagonalNeighbords dimension coordonateFlat =
+  (* calculate north and south of @coordonateFlat depending on given i *)
+  let upDown i =
+    match flatCoordonateToMatriceCoordonate dimension coordonateFlat with
+      | (x::y::[]) ->
+      begin
+        if  (
+              coordonateInsideDimension dimension (x::(y+i)::[])
+            )
+        then (matriceCoordonateToFlatCoordonate dimension (x::(y+i)::[]))::[]
+        else []
+      end
+      | _ -> failwith "Wrong coordinates"
+  in
+    let west x =
+      if (coordonateInsideDimension dimension (flatCoordonateToMatriceCoordonate dimension (x - 1))) then 
+      (x - 1)::[] else []
+  in
+    let est x =
+      if (coordonateInsideDimension dimension (flatCoordonateToMatriceCoordonate dimension (x + 1))) then 
+      (x + 1)::[] else [] 
+  in
+  (* calculate est and west for each element of @listOfNorthSouthCenterNeighbors, north south and center*)
+    let rec aux listOfNorthSouthCenterNeighbors result =
+      match listOfNorthSouthCenterNeighbors with
+        | [] -> result
+        | h::t -> aux t (west h)@(est h)@result
+  in aux ((upDown 1)@(upDown (-1))@(coordonateFlat::[])) (upDown 1)@(upDown (-1));;
+
 let rec print_list listOfInt =
   match listOfInt with
     | [] -> ()
     | h::t -> print_int h; print_endline "";print_list t;;
 
-    (*
-    state -> listOfNeighbordsStates -> newState
-    *)
-    let transitionFonction state listOfneighbors = ();;
+  (*
+    transition for alphabet 1, rules of game of life
+  *)
+  let gameOfLife symbol listOfNeighborsSymbols =
+    let rec auxNbAliveNeighbors neighbors res =
+      match neighbors with
+        | [] -> res
+        | h::t -> auxNbAliveNeighbors t (res +
+                                      match symbol with
+                                        | Alive -> 1
+                                        | Dead -> 0
+                                    )
+    in let nbAliveN = auxNbAliveNeighbors listOfNeighborsSymbols 0 in
+      match symbol with
+        | Alive -> if nbAliveN = 2 || nbAliveN = 3 then Alive else Dead
+        | Dead -> if nbAliveN = 3 then Alive else Dead;;
 
-    (*
-    listeOfState 
-    *)
-    let nextStep listOfState transitionFonction calculateNeighbors dimension = ();;
 
-    
+  (*
+  *)
+  let nextStep listOfState transitionFonction calculateNeighbors dimension = 
+    let rec aux currentList currentCoord result =
+      match currentList with
+        | [] -> result
+        | h::t -> aux t (currentCoord+1) ((transitionFonction h (calculateNeighbors dimension currentCoord))::result)
+    in aux listOfState 1 [];;
+
     let dimensionTest = {numberOfDimention = 2; cellPerSide = 51::36::[]};;
     let dimensionTest2 = {numberOfDimention = 2; cellPerSide = 50::3::[]};;
-    print_list (noDiagonalNeighbords dimensionTest 64);;
+    print_list (diagonalNeighbords dimensionTest 64);;
     print_endline "";
-    print_list (noDiagonalNeighbords dimensionTest2 18);;
+    print_list (diagonalNeighbords dimensionTest2 18);;
