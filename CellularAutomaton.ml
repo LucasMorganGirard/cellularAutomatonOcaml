@@ -133,8 +133,38 @@ let coordonateInsideDimension dimension coordonateMatrice =
     von Neumann neighborhood
     return list of integer coordinates of the neighborhood
 *)
-let noDiagonalNeighbords dimension coordonate = 
-  
+let noDiagonalNeighbords dimension coordonateFlat = 
+  let north =
+    match flatCoordonateToMatriceCoordonate dimension coordonateFlat with 
+      | (x::y::[]) ->
+      begin
+        if  (
+              coordonateInsideDimension dimension (x::(y-1)::[])
+            ) 
+        then (matriceCoordonateToFlatCoordonate dimension (x::(y-1)::[]))::[]
+        else []
+      end
+      | _ -> failwith "Wrong coordinates"
+  in
+    let south =
+      match flatCoordonateToMatriceCoordonate dimension coordonateFlat with 
+        | (x::y::[]) ->
+        begin
+          if  (
+                coordonateInsideDimension dimension (x::(y+1)::[])
+              ) 
+          then (matriceCoordonateToFlatCoordonate dimension (x::(y+1)::[]))::[]
+          else []
+        end
+        | _ -> failwith "Wrong coordinates"
+  in
+    let west =
+      if (coordonateInsideDimension dimension (flatCoordonateToMatriceCoordonate dimension (coordonateFlat - 1))) then 
+      (coordonateFlat - 1)::[] else []
+  in
+    let est =
+      if (coordonateInsideDimension dimension (flatCoordonateToMatriceCoordonate dimension (coordonateFlat + 1))) then 
+      (coordonateFlat + 1)::[] else [] in north@south@west@est;;
 
 let rec print_list listOfInt =
   match listOfInt with
@@ -151,11 +181,9 @@ let rec print_list listOfInt =
     *)
     let nextStep listOfState transitionFonction calculateNeighbors dimension = ();;
 
-(*     
+    
     let dimensionTest = {numberOfDimention = 2; cellPerSide = 51::36::[]};;
     let dimensionTest2 = {numberOfDimention = 2; cellPerSide = 50::3::[]};;
-    print_list (flatCoordonateToMatriceCoordonate dimensionTest 64);;
+    print_list (noDiagonalNeighbords dimensionTest 64);;
     print_endline "";
-    print_list (flatCoordonateToMatriceCoordonate dimensionTest2 18);;
-    print_endline "";
-    print_int (matriceCoordonateToFlatCoordonate dimensionTest (flatCoordonateToMatriceCoordonate dimensionTest 64));; *)
+    print_list (noDiagonalNeighbords dimensionTest2 18);;
