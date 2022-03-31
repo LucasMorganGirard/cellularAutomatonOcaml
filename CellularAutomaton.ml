@@ -10,21 +10,24 @@
    In order to use it in other methods, a tech method to match int to alphabet and alphabet to int is needed.
  *)
 
-type alphabet1 = Alive | Dead;;
+(*
+  Alphabet1 is used for exemple game of life
+*)
+type alphabet1 = Aliv | Dead;;
 type alphabet2 = A | B | C | D | E | F | G | H;;
 
 let alphabet1ToState symbole =
   match symbole with
-    | Alive -> 1
+    | Aliv -> 1
     | Dead -> 2;;
 
 let stateToAlphabet1 state =
-  if state == 1 then Alive
+  if state == 1 then Aliv
   else Dead;;
 
 let printAlphabet1 symbole =
     match symbole with
-      | Alive -> print_string "Alive "
+      | Aliv -> print_string "Alive "
       | Dead -> print_string "Dead  ";;
 
 let alphabet2ToState symbole =
@@ -136,7 +139,8 @@ let coordonateInsideDimension dimension coordonateMatrice =
 
 (*
     Moore neighborhood
-    return list of integer coordinates of the neighborhood
+    return list of integer coordinates of the neighborhood of @coordonateFlat,
+    @coordonateFlat a coordonate in a one dimensional list representing a matrice of dimension @dimension
 *)
 let diagonalNeighbords dimension coordonateFlat =
   (* calculate north and south of @coordonateFlat depending on given i *)
@@ -169,11 +173,6 @@ let diagonalNeighbords dimension coordonateFlat =
         | h::t -> aux t (west h)@(est h)@result
   in aux ((upDown 1)@(upDown (-1))@(coordonateFlat::[])) (upDown 1)@(upDown (-1));;
 
-let rec print_list listOfInt =
-  match listOfInt with
-    | [] -> ()
-    | h::t -> print_int h; print_endline "";print_list t;;
-
 (*
   transition for alphabet 1, rules of game of life
 *)
@@ -183,13 +182,13 @@ let gameOfLife symbol listOfNeighborsSymbols listOfState =
       | [] -> res
       | h::t -> auxNbAliveNeighbors t (res +
                                         match stateOfCoordonate listOfState h with
-                                          | Alive -> 1
+                                          | Aliv -> 1
                                           | Dead -> 0
                                       )
   in let nbAliveN = auxNbAliveNeighbors listOfNeighborsSymbols 0 in
     match symbol with
-      | Alive -> if nbAliveN = 2 || nbAliveN = 3 then Alive else Dead
-      | Dead -> if nbAliveN = 3 then Alive else Dead;;
+      | Aliv -> if nbAliveN = 2 || nbAliveN = 3 then Aliv else Dead
+      | Dead -> if nbAliveN = 3 then Aliv else Dead;;
 
 (*
 
@@ -201,6 +200,19 @@ let nextStep listOfState transitionFonction calculateNeighbors dimension =
       | h::t -> aux t (currentCoord+1) (result@(transitionFonction h (calculateNeighbors dimension currentCoord) listOfState)::[])
   in aux listOfState 1 [];;
 
+(********************************)
+(* Utilities *)
+
+(* print a list of int *)
+let rec print_list listOfInt =
+  match listOfInt with
+    | [] -> print_endline ""
+    | h::t -> print_int h; print_string " ";print_list t;;
+
+(*
+  print a matrice (represented by a one dimension list of 'a) of dimension @dimension,
+  fonction to print 'a must be provided in @statePrintFct.
+*)
 let print_matrice listOfState statePrintFct dimension =
   match dimension.cellPerSide with
   | x::y::t -> 
@@ -229,13 +241,14 @@ let print_matrice listOfState statePrintFct dimension =
   the ruban and the dimension goes together and the ruban MUST match de given dimension size for height and width.
   The ruban is a one dimension list so it just need to be of size width*height size for 2D.
 *)
-let dimensionTest = {numberOfDimention = 2; cellPerSide = 5::3::[]};;
-let rubanTest = 
-  Dead::Dead::Dead::Dead::Alive::
-  Alive::Alive::Alive::Dead::Dead::
-  Dead::Dead::Dead::Dead::Alive::[];;
 
-let print_gameOfLife ruban =
+(* let dimensionTest = {numberOfDimention = 2; cellPerSide = 5::3::[]};;
+let rubanTest = 
+  Dead::Dead::Dead::Dead::Aliv::
+  Aliv::Aliv::Aliv::Dead::Dead::
+  Dead::Dead::Dead::Dead::Aliv::[];;
+
+let print_gameOfLife ruban iterations =
   let rec aux nbIteration currentRuban =
     let nextIt = nextStep currentRuban gameOfLife diagonalNeighbords dimensionTest in
     print_matrice nextIt printAlphabet1 dimensionTest; print_endline "";
@@ -243,6 +256,6 @@ let print_gameOfLife ruban =
     begin
       aux (nbIteration-1) nextIt
     end
-  in aux 10 ruban;;
+  in aux iterations ruban;;
 
-print_gameOfLife rubanTest
+print_gameOfLife rubanTest 100 *)
