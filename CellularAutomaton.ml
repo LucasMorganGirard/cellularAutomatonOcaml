@@ -179,7 +179,6 @@ let rec print_list listOfInt =
 *)
 let gameOfLife symbol listOfNeighborsSymbols listOfState =
   let rec auxNbAliveNeighbors neighbors res =
-    print_list neighbors; print_endline "";
     match neighbors with
       | [] -> res
       | h::t -> auxNbAliveNeighbors t (res +
@@ -226,12 +225,24 @@ let print_matrice listOfState statePrintFct dimension =
 (********************************)
 (* TESTS *)
 
+(*
+  the ruban and the dimension goes together and the ruban MUST match de given dimension size for height and width.
+  The ruban is a one dimension list so it just need to be of size width*height size for 2D.
+*)
 let dimensionTest = {numberOfDimention = 2; cellPerSide = 5::3::[]};;
-(* print_list (diagonalNeighbords dimensionTest 1);; *)
-
 let rubanTest = 
   Dead::Dead::Dead::Dead::Alive::
   Alive::Alive::Alive::Dead::Dead::
   Dead::Dead::Dead::Dead::Alive::[];;
 
-print_matrice (nextStep (nextStep rubanTest gameOfLife diagonalNeighbords dimensionTest) gameOfLife diagonalNeighbords dimensionTest) printAlphabet1 dimensionTest;;
+let print_gameOfLife ruban =
+  let rec aux nbIteration currentRuban =
+    let nextIt = nextStep currentRuban gameOfLife diagonalNeighbords dimensionTest in
+    print_matrice nextIt printAlphabet1 dimensionTest; print_endline "";
+    if nbIteration > 0 then
+    begin
+      aux (nbIteration-1) nextIt
+    end
+  in aux 10 ruban;;
+
+print_gameOfLife rubanTest
