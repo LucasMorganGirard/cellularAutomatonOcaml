@@ -63,15 +63,28 @@ let draw_matrice ruban =
           | Dead -> draw_dead (x*10) (y*10); if x+1>width then aux 1 (y+1) t else aux (x+1) y t
   in aux 1 1 ruban;;
 
-let draw_gameOfLife ruban =
+let draw_gameOfLife () =
   let rec aux currentRuban =
     draw_matrice currentRuban;
     let nextIt = nextStep currentRuban gameOfLife diagonalNeighbords dimensionGUI in
+    let rec key () =
     let e = wait_next_event [Key_pressed] in
-    if e.keypressed then
-      aux nextIt
-  in aux ruban;;
+      if e.keypressed then
+      begin
+        if e.Graphics.key = 'n' then
+          aux nextIt
+        else
+        begin
+          if e.Graphics.key = 'q' then
+            close_graph ()
+          else
+            if e.Graphics.key = 'r' then
+              aux create_rubanStartGUI
+            else
+              key ()
+        end
+      end
+    in key ()
+  in aux create_rubanStartGUI;;
 
-draw_gameOfLife create_rubanStartGUI;;
-
-close_graph ()
+draw_gameOfLife ();;

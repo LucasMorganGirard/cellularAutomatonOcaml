@@ -6,5 +6,6 @@ Nous avons choisit de rester bien fonctionnelle avec des listes malgré tout.
 Nous avons perdu beaucoup de temps a essayer de faire des fonction generique sur plusieurs dimensions 
 mais ça n'a pas vraiment fonctionné et nous avons du revenir a des fonction dimension specifique
 
+n -> next step, q -> quit, r -> reset
 
 /Users/zbwb/.opam/4.11.1/bin/ocamlc -I /Users/zbwb/.opam/4.11.1/lib/graphics/ graphics.cma -o a.out CellularAutomaton.ml GUI.ml
