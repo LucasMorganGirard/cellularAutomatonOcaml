@@ -96,6 +96,7 @@ let coordonateInsideDimension dimension coordonateMatrice =
 (********************************)
 
 (*
+  dimension -> int -> list int
   Moore neighborhood
   return list of integer coordinates of the neighborhood of @coordonateFlat,
   @coordonateFlat a coordonate in a one dimensional list representing a matrice of dimension @dimension
@@ -132,7 +133,9 @@ let diagonalNeighbords dimension coordonateFlat =
   in aux ((upDown 1)@(upDown (-1))@(coordonateFlat::[])) (upDown 1)@(upDown (-1));;
 
 (*
-  transition for alphabet 1, rules of game of life
+  aplhabet -> int list -> alpbahet list -> alpbahet
+  transition for alphabet, rules of game of life
+  From a list of coordonate of the neighbors find the next state for given state (symbol).
 *)
 let gameOfLife symbol listOfNeighborsSymbols listOfState =
   let rec auxNbAliveNeighbors neighbors res =
@@ -149,26 +152,22 @@ let gameOfLife symbol listOfNeighborsSymbols listOfState =
       | Dead -> if nbAliveN = 3 then Aliv else Dead;;
 
 (*
-
+  aplphabet list -> (aplhabet -> int list -> alpbahet list -> alpbahet) -> (dimension -> int -> list int) -> dimension -> aplphabet list
+  Calulate the next states for all symbol of the ruban of alphabet symbols.
 *)
-let nextStep listOfState transitionFonction calculateNeighbors dimension = 
+let nextStep ruban transitionFonction calculateNeighbors dimension = 
   let rec aux currentList currentCoord result =
     match currentList with
       | [] -> result
-      | h::t -> aux t (currentCoord+1) (result@(transitionFonction h (calculateNeighbors dimension currentCoord) listOfState)::[])
-  in aux listOfState 1 [];;
+      | h::t -> aux t (currentCoord+1) (result@(transitionFonction h (calculateNeighbors dimension currentCoord) ruban)::[])
+  in aux ruban 1 [];;
 
 (********************************)
 (* Utilities *)
 
-(* print a list of int *)
-let rec print_list listOfInt =
-  match listOfInt with
-    | [] -> print_endline ""
-    | h::t -> print_int h; print_string " ";print_list t;;
-
 (*
-  print a matrice (represented by a one dimension list of 'a) of dimension @dimension,
+  alphabet list -> (alphabet -> unit) -> dimension -> unit
+  Print a matrice (represented by a one dimension list of 'a) of dimension @dimension,
   fonction to print 'a must be provided in @statePrintFct.
 *)
 let print_matrice listOfState statePrintFct dimension =
@@ -191,6 +190,10 @@ let print_matrice listOfState statePrintFct dimension =
   end
   | _ -> failwith "Wrong dimension format";;
 
+(*
+  int -> alphabet list -> alphabet list
+  Inverse state at @coordonate in ruban of alphabet symbols.
+*)
 let inverseState coordonate ruban =
   let rec aux currentRuban currentCoordonate resultRuban =
     match currentRuban with
