@@ -233,6 +233,19 @@ let print_matrice listOfState statePrintFct dimension =
   end
   | _ -> failwith "Wrong dimension format";;
 
+let inverseState coordonate ruban =
+  let rec aux currentRuban currentCoordonate resultRuban =
+    match currentRuban with
+      | [] -> failwith "coordonate not in ruban"
+      | h::t -> 
+                if coordonate = currentCoordonate then
+                  match h with
+                    | Aliv -> resultRuban@Dead::[]@t
+                    | Dead -> resultRuban@Aliv::[]@t
+                  else
+                    aux t (currentCoordonate+1) (resultRuban@h::[])
+    in aux ruban 1 [];;
+
 
 (********************************)
 (* TESTS *)

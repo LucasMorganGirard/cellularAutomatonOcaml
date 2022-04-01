@@ -47,6 +47,14 @@ let create_rubanStartGUI =
   in aux [] 1;;
 
 (*
+  Remove all key stacked up in the list of keys pressed.
+  Stop keys from staking up if one key stay pushed down.
+*)
+let rec flushKeyPressed () =
+  if key_pressed () then
+    let _ = read_key () in flushKeyPressed ();;
+
+(*
   Draw given ruban for game of life
 *)
 let draw_matrice ruban =
@@ -68,22 +76,38 @@ let draw_gameOfLife () =
     draw_matrice currentRuban;
     let nextIt = nextStep currentRuban gameOfLife diagonalNeighbords dimensionGUI in
     let rec key () =
-    let e = wait_next_event [Key_pressed] in
+    let e = wait_next_event [Button_down; Key_pressed] in
       if e.keypressed then
       begin
         if e.Graphics.key = 'n' then
-          aux nextIt
-        else
         begin
-          if e.Graphics.key = 'q' then
-            close_graph ()
-          else
-            if e.Graphics.key = 'r' then
-              aux create_rubanStartGUI
+          flushKeyPressed ();
+          aux nextIt
+        end
+        else
+        
+        if e.Graphics.key = 'q' then
+        begin
+          flushKeyPressed ();
+          close_graph ()
+        end
+        else if e.Graphics.key = 'r' then
+        begin
+          flushKeyPressed ();
+          aux create_rubanStartGUI
+        end
+        else
+          key ()
+      end
+      else
+      if e.Graphics.button then
+        begin
+          let clickCoordonate = ((e.Graphics.mouse_x-10)/10+1)::((e.Graphics.mouse_y-10)/10+1)::[] in
+            if coordonateInsideDimension dimensionGUI clickCoordonate then
+              aux (inverseState (matriceCoordonateToFlatCoordonate dimensionGUI clickCoordonate) currentRuban)
             else
               key ()
         end
-      end
     in key ()
   in aux create_rubanStartGUI;;
 
