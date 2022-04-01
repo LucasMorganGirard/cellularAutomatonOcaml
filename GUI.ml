@@ -1,3 +1,11 @@
+(** 
+  GIRARD Lucas E176580k
+  GARAUD Orianne E216701U
+  Licence 3 informatique - Univsité de Sciences et Techniques de Nantes
+  Programation fonctionnelle
+  Réalisation d'un modèle d'automate cellulaire.
+*)
+
 open Graphics;;
 open CellularAutomaton;;
 
@@ -7,16 +15,16 @@ open CellularAutomaton;;
 *)
 let dimensionGUI = {numberOfDimention=2; cellPerSide=30::30::[]};;
 
-let s = 20;;
+let casesSize = 20;;
 
 let x_size_side = 
   match dimensionGUI.cellPerSide with
-    | x::y::[] -> (x*s+20)-100
+    | x::y::[] -> (x*casesSize+20)-100
     | _ -> failwith "Wrong format";;
 
 let y_size_side = 
   match dimensionGUI.cellPerSide with
-    | x::y::[] -> (y*s+20)-100
+    | x::y::[] -> (y*casesSize+20)-100
     | _ -> failwith "Wrong format";;
 
 (*
@@ -25,7 +33,7 @@ let y_size_side =
 *)
 let lunchWindow () =
   match dimensionGUI.cellPerSide with
-    | x::y::[] -> open_graph (" "^(string_of_int (x*s+20))^"x"^(string_of_int (y*s+20))^"+100+100")
+    | x::y::[] -> open_graph (" "^(string_of_int (x*casesSize+2*casesSize))^"x"^(string_of_int (y*casesSize+2*casesSize))^"+100+100")
     | _ -> failwith "Wrong format";;
 
 
@@ -38,8 +46,8 @@ let lunchWindow () =
   int -> int -> unit
   Two fonctions drawing rectangles at given coordonates of size 10*10 for the game of life.
 *)
-let draw_alive x y = fill_rect x y s s;;
-let draw_dead x y = draw_rect x y s s;;
+let draw_alive x y = fill_rect x y casesSize casesSize;;
+let draw_dead x y = draw_rect x y casesSize casesSize;;
 
 (*
   unit -> alphabet list
@@ -97,8 +105,8 @@ let draw_matrice ruban =
       | [] -> ()
       | h::t ->
         match h with
-          | Aliv -> draw_alive (x*s) (y*s); if x+1>width then aux 1 (y+1) t else aux (x+1) y t
-          | Dead -> draw_dead (x*s) (y*s); if x+1>width then aux 1 (y+1) t else aux (x+1) y t
+          | Aliv -> draw_alive (x*casesSize) (y*casesSize); if x+1>width then aux 1 (y+1) t else aux (x+1) y t
+          | Dead -> draw_dead (x*casesSize) (y*casesSize); if x+1>width then aux 1 (y+1) t else aux (x+1) y t
   in aux 1 1 ruban;;
 
 (*
@@ -133,7 +141,7 @@ let draw_gameOfLife () =
             else
             if e.button then
                 begin
-                let clickCoordonate = ((e.mouse_x-s)/s+1)::((e.mouse_y-s)/s+1)::[] in
+                let clickCoordonate = ((e.mouse_x-casesSize)/casesSize+1)::((e.mouse_y-casesSize)/casesSize+1)::[] in
                     if coordonateInsideDimension dimensionGUI clickCoordonate then
                     aux (inverseState (matriceCoordonateToFlatCoordonate dimensionGUI clickCoordonate) currentRuban)
                     else key ()
@@ -152,14 +160,19 @@ let draw_gameOfLife () =
   let rec aux currentRuban =
     draw_matrice currentRuban;
     let nextIt = nextStepCustom currentRuban gameOfLifeCustom diagonalNeighbords dimensionGUI listCheckedAlive listCheckedDead in
-    let e = wait_next_event [Key_pressed] in
+    let e = wait_next_event [Button_down; Key_pressed] in
       if e.keypressed then
         match e.key with
         | 'q' -> close_graph ();
         | 'r' -> flushKeyPressed (); aux (create_rubanStartGUI ())
         | _ -> aux nextIt
+      else if e.button then
+        begin
+        let clickCoordonate = ((e.mouse_x-casesSize)/casesSize+1)::((e.mouse_y-casesSize)/casesSize+1)::[] in
+            if coordonateInsideDimension dimensionGUI clickCoordonate then
+            aux (inverseState (matriceCoordonateToFlatCoordonate dimensionGUI clickCoordonate) currentRuban)
+        end
   in aux (create_rubanStartGUI ());;
-
 
 
 (* 
@@ -173,12 +186,12 @@ let create_checkbox x y =
       moveto x (y+25);
       draw_string (string_of_int i);
       moveto (x) y;
-      draw_rect x y s s;
+      draw_rect x y casesSize casesSize;
       place_box (x+50) (i+1);
     end
     else ();
-  in place_box x 0
-;;
+  in place_box x 0;;
+
 
 (* 
   int -> int list 
@@ -190,25 +203,25 @@ let checkbox_coord x =
         let listBox = x::list in
         place_box (x+50) (i+1) listBox
     else List.rev list;
-    in place_box x 0 []
-;;
+    in place_box x 0 [];;
+
 
 (* 
   int -> int -> int list -> int -> bool * int * int
   Check if the coordinates x y of the user's click are in a box 
 *)
 let check_mouse_clicked x y coor_box_x box_y =
-    if(y >= box_y && y <= (box_y+s)) then 
+    if(y >= box_y && y <= (box_y+casesSize)) then 
         let rec aux list i =
             match list with 
             | [] -> (false,0,0) 
-            | h::t -> if (x >= h && x <= (h+s)) then (true,h,i)
+            | h::t -> if (x >= h && x <= (h+casesSize)) then (true,h,i)
                     else aux t (i+1)
         in aux coor_box_x 0
     else (false,0,0);;
 
 
-(* 
+(*
   Use to detect mouse event to fill the checkbox 
   Init the game when a key is pressed 
 *)
@@ -220,17 +233,17 @@ let rec event_loop x y listBoxCoord listCheckedAlive listCheckedDead =
         
             if(inBox1) then begin 
                 let list = ind1::listCheckedAlive in
-                fill_rect x_box1 y s s; 
+                fill_rect x_box1 y casesSize casesSize; 
                 event_loop x y listBoxCoord list listCheckedDead
             end
             else if(inBox2) then begin 
                 let list = ind2::listCheckedDead in 
-                fill_rect x_box2 (y-100) s s; 
+                fill_rect x_box2 (y-100) casesSize casesSize; 
                 event_loop x y listBoxCoord listCheckedAlive list 
             end
             else begin event_loop x y listBoxCoord listCheckedAlive listCheckedDead
             end
-    else 
+            else 
             if key_pressed () then
                 if(read_key () = 'c') then  (* press c for custom version *)
                     draw_gameOfLifeCustom listCheckedAlive listCheckedDead 
@@ -240,6 +253,7 @@ let rec event_loop x y listBoxCoord listCheckedAlive listCheckedDead =
                 event_loop x y listBoxCoord listCheckedAlive listCheckedDead;;
 
 (* 
+  unit -> unit
   Init the frame and add a description of how to use the game
   Also init the checkbox for the custom version
  *)
