@@ -5,7 +5,7 @@ open CellularAutomaton;;
 (*
   DIMENSIONS: You can change cellPerSide values to change width and height of display
 *)
-let dimensionGUI = {numberOfDimention=2; cellPerSide=30::30::[]};;
+let dimensionGUI = {numberOfDimention=2; cellPerSide=45::45::[]};;
 Random.init;;
 
 let s = 20;;
@@ -103,6 +103,7 @@ let draw_gameOfLife ruban =
 
 
 (* place the checkbox in the graph *)
+(* int -> int -> unit *)
 let create_checkbox x y = 
   let rec place_box x i =
     if(i < 9) then 
@@ -118,6 +119,7 @@ let create_checkbox x y =
 ;;
 
 (* get the coor of the box x position in a list *)
+(* int -> int list *)
 let checkbox_coord x = 
     let rec place_box x i list =
     if(i < 9) then 
@@ -128,6 +130,7 @@ let checkbox_coord x =
 ;;
 
 (* check if the coord x y are in a box *)
+(*  int -> int -> int list -> int -> bool * int * int *)
 let check_mouse_clicked x y coor_box_x box_y =
     if(y >= box_y && y <= (box_y+s)) then 
         let rec aux list i =
@@ -172,7 +175,14 @@ let game =
     draw_string "GAME OF LIFE";
 
     moveto (x_size_side/6) ((y_size_side/2)+200);
-    draw_string "Command : n -> next ; q -> quit ; r -> reset ; c -> start custom ";
+    draw_string "Command : n -> next ; q -> quit ; r -> reset ; c -> start custom game ";
+    
+    moveto (x_size_side/6) ((y_size_side/2)+150);
+    draw_string "Press any key to start a classic game";
+    moveto (x_size_side/6) ((y_size_side/2)+125);
+    draw_string "In the classical version, a living cell needs 2 or 3 neighbors";
+    moveto (x_size_side/6) ((y_size_side/2)+100);
+    draw_string "and a dead cell needs 3 living cells to be alive.";
     
     let x = x_size_side/4 in 
     let y = y_size_side/2 in 
