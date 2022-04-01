@@ -1,85 +1,39 @@
 (** Lucas GIRARD - Orianne GARAUD
- Licence 3 informatique - Univsité de Sciences et Techniques de Nantes
- Programation fonctionnelle
- Réalisation d'un modèle d'automate cellulaire.
- L'objectif est d'avoir un modèle simple
- *)
+  Licence 3 informatique - Univsité de Sciences et Techniques de Nantes
+  Programation fonctionnelle
+  Réalisation d'un modèle d'automate cellulaire.
+  L'objectif est d'avoir un modèle simple
+*)
 
- (*
-   State is an int to allows for a big number of possible state and to facilitate using different alphabet.
-   In order to use it in other methods, a tech method to match int to alphabet and alphabet to int is needed.
- *)
+(*
+  State is an int to allows for a big number of possible state and to facilitate using different alphabet.
+  In order to use it in other methods, a tech method to match int to alphabet and alphabet to int is needed.
+*)
 
 (*
   Alphabet1 is used for exemple game of life
 *)
-type alphabet1 = Aliv | Dead;;
-type alphabet2 = A | B | C | D | E | F | G | H;;
+type alphabet = Aliv | Dead;;
 
-let alphabet1ToState symbole =
-  match symbole with
-    | Aliv -> 1
-    | Dead -> 2;;
-
-let stateToAlphabet1 state =
-  if state == 1 then Aliv
-  else Dead;;
-
-let printAlphabet1 symbole =
+(*
+  alphabet -> unit
+  print a symbol of type alphabet.
+*)
+let printAlphabet symbole =
     match symbole with
       | Aliv -> print_string "Alive "
       | Dead -> print_string "Dead  ";;
 
-let alphabet2ToState symbole =
-  match symbole with
-    | A -> 1
-    | B -> 2
-    | C -> 3
-    | D -> 4
-    | E -> 5
-    | F -> 6
-    | G -> 7
-    | H -> 8;;
-
-let stateToAlphabet2 state =
-  if state = 1 then A
-  else if state = 2 then B
-  else if state = 3 then C
-  else if state = 4 then D
-  else if state = 5 then E
-  else if state = 6 then F
-  else if state = 7 then G
-  else H;;
-
-let printAlphabet2 symbole =
-  match symbole with
-    | A -> print_string "A"
-    | B -> print_string "B"
-    | C -> print_string "C"
-    | D -> print_string "D"
-    | E -> print_string "E"
-    | F -> print_string "F"
-    | G -> print_string "G"
-    | H -> print_string "H";;
 (*
   Number of dimention and size of each side of the dimension;
-  exemple for 2D : width and height; {numberOfDimention:2; cellPerSide: 10::10::[]}
-  a space of 2 dimention with 10 cells width and 10 cells height.
+  exemple for 2D : width and height; {numberOfDimention:2; cellPerSide: 10::15::[]}
+  a space of 2 dimention with 10 symbols width and 15 symbols height.
 *)
 type dimension = {numberOfDimention: int; cellPerSide: int list};;
 
 (*
-  find the maximum coordinates for a list of @dimension
-*)
-let maxCoordinates dimension =
-  let rec aux currentMult currentCellPerSide =
-    match currentCellPerSide with
-      | [] -> currentMult
-      | h::t -> aux (currentMult * h) t
-  in aux 1 dimension.cellPerSide;;
-
-(*
-  return state from list @listeOfState at integer @coordonate
+  alphabet list -> int -> alphabet
+  return symbol from list @listeOfState at integer @coordonate
 *)
 let stateOfCoordonate listOfState coordonate =
   (*
@@ -98,8 +52,9 @@ let stateOfCoordonate listOfState coordonate =
 
 (********************************)
 (* 
-    tech methods to find 2D neighborhood
-    convert coordonate from single dimension integer to two dimension integer coordonate
+
+  tech methods to find 2D neighborhood
+  convert coordonate from single dimension integer to two dimension integer coordonate
 *)
 let flatCoordonateToMatriceCoordonate dimension coordonateFlat =
   match dimension.cellPerSide with
@@ -111,7 +66,9 @@ let flatCoordonateToMatriceCoordonate dimension coordonateFlat =
     | _ -> failwith "Wrong dimension format";;
 
 (*
-    Reverse from flatCoordonateToMatriceCoordonate
+  dimension -> int list -> int
+  Return 1D coordonate of a pair (list) of 2D coordonate.
+  Reverse from flatCoordonateToMatriceCoordonate.
 *)
 let matriceCoordonateToFlatCoordonate dimension coordonateMatrice =
   match dimension.cellPerSide with
@@ -124,7 +81,8 @@ let matriceCoordonateToFlatCoordonate dimension coordonateMatrice =
     | _ -> failwith "Wrong dimension format";;
 
 (*
-    check if matrice coordonate (list of coordinates) is valid for given dimension
+  dimension -> int list -> boolean
+  Check if matrice coordonate (x, y) (list of coordinates) is valid for given dimension.
 *)
 let coordonateInsideDimension dimension coordonateMatrice =
   match dimension.cellPerSide with
@@ -138,9 +96,10 @@ let coordonateInsideDimension dimension coordonateMatrice =
 (********************************)
 
 (*
-    Moore neighborhood
-    return list of integer coordinates of the neighborhood of @coordonateFlat,
-    @coordonateFlat a coordonate in a one dimensional list representing a matrice of dimension @dimension
+  dimension -> int -> list int
+  Moore neighborhood
+  return list of integer coordinates of the neighborhood of @coordonateFlat,
+  @coordonateFlat a coordonate in a one dimensional list representing a matrice of dimension @dimension
 *)
 let diagonalNeighbords dimension coordonateFlat =
   (* calculate north and south of @coordonateFlat depending on given i *)
@@ -174,7 +133,9 @@ let diagonalNeighbords dimension coordonateFlat =
   in aux ((upDown 1)@(upDown (-1))@(coordonateFlat::[])) (upDown 1)@(upDown (-1));;
 
 (*
-  transition for alphabet 1, rules of game of life
+  aplhabet -> int list -> alpbahet list -> alpbahet
+  transition for alphabet, rules of game of life
+  From a list of coordonate of the neighbors find the next state for given state (symbol).
 *)
 let gameOfLife symbol listOfNeighborsSymbols listOfState =
   let rec auxNbAliveNeighbors neighbors res =
@@ -191,26 +152,22 @@ let gameOfLife symbol listOfNeighborsSymbols listOfState =
       | Dead -> if nbAliveN = 3 then Aliv else Dead;;
 
 (*
-
+  aplphabet list -> (aplhabet -> int list -> alpbahet list -> alpbahet) -> (dimension -> int -> list int) -> dimension -> aplphabet list
+  Calulate the next states for all symbol of the ruban of alphabet symbols.
 *)
-let nextStep listOfState transitionFonction calculateNeighbors dimension = 
+let nextStep ruban transitionFonction calculateNeighbors dimension = 
   let rec aux currentList currentCoord result =
     match currentList with
       | [] -> result
-      | h::t -> aux t (currentCoord+1) (result@(transitionFonction h (calculateNeighbors dimension currentCoord) listOfState)::[])
-  in aux listOfState 1 [];;
+      | h::t -> aux t (currentCoord+1) (result@(transitionFonction h (calculateNeighbors dimension currentCoord) ruban)::[])
+  in aux ruban 1 [];;
 
 (********************************)
 (* Utilities *)
 
-(* print a list of int *)
-let rec print_list listOfInt =
-  match listOfInt with
-    | [] -> print_endline ""
-    | h::t -> print_int h; print_string " ";print_list t;;
-
 (*
-  print a matrice (represented by a one dimension list of 'a) of dimension @dimension,
+  alphabet list -> (alphabet -> unit) -> dimension -> unit
+  Print a matrice (represented by a one dimension list of 'a) of dimension @dimension,
   fonction to print 'a must be provided in @statePrintFct.
 *)
 let print_matrice listOfState statePrintFct dimension =
@@ -233,6 +190,22 @@ let print_matrice listOfState statePrintFct dimension =
   end
   | _ -> failwith "Wrong dimension format";;
 
+(*
+  int -> alphabet list -> alphabet list
+  Inverse state at @coordonate in ruban of alphabet symbols.
+*)
+let inverseState coordonate ruban =
+  let rec aux currentRuban currentCoordonate resultRuban =
+    match currentRuban with
+      | [] -> failwith "coordonate not in ruban"
+      | h::t -> 
+                if coordonate = currentCoordonate then
+                  match h with
+                    | Aliv -> resultRuban@Dead::[]@t
+                    | Dead -> resultRuban@Aliv::[]@t
+                  else
+                    aux t (currentCoordonate+1) (resultRuban@h::[])
+    in aux ruban 1 [];;
 
 (********************************)
 (* TESTS *)
