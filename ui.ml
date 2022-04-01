@@ -160,7 +160,7 @@ let rec event_loop x y listBoxCoord listChecked =
         let inBox, x_box, ind = check_mouse_clicked x_mouse y_mouse listBoxCoord y in 
         
             if(inBox) then begin 
-                let list = (List.nth listBoxCoord ind)::listChecked in
+                let list = (List.nth listBoxCoord ind)::listChecked in (*  recup pas le bon indice logique *)
                 fill_rect x_box y s s; 
                 print_int ind;
                 event_loop x y listBoxCoord list
@@ -169,7 +169,7 @@ let rec event_loop x y listBoxCoord listChecked =
             end
     else 
             if key_pressed () then
-                if(read_key () = 'a') then 
+                if(read_key () = 'c') then (* press c for custom version *)
                     draw_gameOfLifeCustom create_rubanStartGUI listChecked
                 else 
                     draw_gameOfLife create_rubanStartGUI
