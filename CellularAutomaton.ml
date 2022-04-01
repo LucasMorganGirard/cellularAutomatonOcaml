@@ -207,6 +207,43 @@ let inverseState coordonate ruban =
                     aux t (currentCoordonate+1) (resultRuban@h::[])
     in aux ruban 1 [];;
 
+
+
+
+(* check if the number of alive cells respect one of the rule in the list *)
+let number_of_cells nbAlive listSelectedCell = 
+  let rec aux l = 
+    match l with 
+    | [] -> false
+    | h::t -> if(nbAlive = h) then true 
+              else aux t 
+  in aux listSelectedCell;;
+
+
+(* game of life with custom rules *)
+let gameOfLifeCustom symbol listOfNeighborsSymbols listOfState listCheckedAlive listCheckedDead  =
+  let rec auxNbAliveNeighbors neighbors res =
+    match neighbors with
+      | [] -> res
+      | h::t -> auxNbAliveNeighbors t (res +
+                                        match stateOfCoordonate listOfState h with
+                                          | Aliv -> 1
+                                          | Dead -> 0
+                                      )
+  in let nbAliveN = auxNbAliveNeighbors listOfNeighborsSymbols 0 in
+    match symbol with
+      | Aliv -> if number_of_cells nbAliveN listCheckedAlive then Aliv else Dead
+      | Dead -> if number_of_cells nbAliveN listCheckedDead then Aliv else Dead;;
+
+
+  let nextStepCustom listOfState transitionFonction calculateNeighbors dimension listCheckedAlive listCheckedDead  = 
+  let rec aux currentList currentCoord result =
+    match currentList with
+      | [] -> result
+      | h::t -> aux t (currentCoord+1) (result@(transitionFonction h (calculateNeighbors dimension currentCoord) listOfState listCheckedAlive listCheckedDead )::[])
+  in aux listOfState 1 [];;
+
+
 (********************************)
 (* TESTS *)
 
@@ -232,36 +269,3 @@ let print_gameOfLife ruban iterations =
   in aux iterations ruban;;
 
 print_gameOfLife rubanTest 100 *)
-
-
-(* check if the number of alive cells respect one of the rule in the list *)
-let number_of_cells nbAlive listSelectedCell = 
-  let rec aux l = 
-    match l with 
-    | [] -> false
-    | h::t -> if(nbAlive = h) then true 
-              else aux t 
-  in aux listSelectedCell;;
-
-(* game of life with custom rules *)
-let gameOfLifeCustom symbol listOfNeighborsSymbols listOfState listCheckedAlive listCheckedDead  =
-  let rec auxNbAliveNeighbors neighbors res =
-    match neighbors with
-      | [] -> res
-      | h::t -> auxNbAliveNeighbors t (res +
-                                        match stateOfCoordonate listOfState h with
-                                          | Aliv -> 1
-                                          | Dead -> 0
-                                      )
-  in let nbAliveN = auxNbAliveNeighbors listOfNeighborsSymbols 0 in
-    match symbol with
-      | Aliv -> if number_of_cells nbAliveN listCheckedAlive then Aliv else Dead
-      | Dead -> if number_of_cells nbAliveN listCheckedDead then Aliv else Dead;;
-
-
-  let nextStepCustom listOfState transitionFonction calculateNeighbors dimension listCheckedAlive listCheckedDead  = 
-  let rec aux currentList currentCoord result =
-    match currentList with
-      | [] -> result
-      | h::t -> aux t (currentCoord+1) (result@(transitionFonction h (calculateNeighbors dimension currentCoord) listOfState listCheckedAlive listCheckedDead )::[])
-  in aux listOfState 1 [];;

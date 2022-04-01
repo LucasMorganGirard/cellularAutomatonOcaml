@@ -142,7 +142,12 @@ let draw_gameOfLife () =
     in aux (create_rubanStartGUI ());;
 
 
-(* game of life with a list of a number of cell to be equals to *)
+(* 
+  unit -> unit
+  Play a game of life with custom rules depending on user choice 
+  listCheckedAlive -> is the rule for an alive cell
+  listCheckedDead -> is the rule for an dead cell
+*)
   let draw_gameOfLifeCustom listCheckedAlive listCheckedDead =
   let rec aux currentRuban =
     draw_matrice currentRuban;
@@ -151,13 +156,16 @@ let draw_gameOfLife () =
       if e.keypressed then
         match e.key with
         | 'q' -> close_graph ();
+        | 'r' -> flushKeyPressed (); aux (create_rubanStartGUI ())
         | _ -> aux nextIt
   in aux (create_rubanStartGUI ());;
 
 
 
-(* place the checkbox in the graph *)
-(* int -> int -> unit *)
+(* 
+  int -> int -> unit 
+  Place the checkbox in the frame
+*)
 let create_checkbox x y = 
   let rec place_box x i =
     if(i < 9) then 
@@ -172,8 +180,10 @@ let create_checkbox x y =
   in place_box x 0
 ;;
 
-(* get the coor of the box x position in a list *)
-(* int -> int list *)
+(* 
+  int -> int list 
+  Get the coordinate of the box x position in a list
+ *)
 let checkbox_coord x = 
     let rec place_box x i list =
     if(i < 9) then 
@@ -183,8 +193,10 @@ let checkbox_coord x =
     in place_box x 0 []
 ;;
 
-(* check if the coord x y are in a box *)
-(*  int -> int -> int list -> int -> bool * int * int *)
+(* 
+  int -> int -> int list -> int -> bool * int * int
+  Check if the coordinates x y of the user's click are in a box 
+*)
 let check_mouse_clicked x y coor_box_x box_y =
     if(y >= box_y && y <= (box_y+s)) then 
         let rec aux list i =
@@ -196,7 +208,10 @@ let check_mouse_clicked x y coor_box_x box_y =
     else (false,0,0);;
 
 
-(* allow the user to click on box *)
+(* 
+  Use to detect mouse event to fill the checkbox 
+  Init the game when a key is pressed 
+*)
 let rec event_loop x y listBoxCoord listCheckedAlive listCheckedDead =
     if button_down () then  
         let x_mouse, y_mouse = mouse_pos () in
@@ -224,6 +239,10 @@ let rec event_loop x y listBoxCoord listCheckedAlive listCheckedDead =
             else 
                 event_loop x y listBoxCoord listCheckedAlive listCheckedDead;;
 
+(* 
+  Init the frame and add a description of how to use the game
+  Also init the checkbox for the custom version
+ *)
 let game () = 
     moveto (x_size_side/2) ((y_size_side/2)+250);
     draw_string "GAME OF LIFE";
