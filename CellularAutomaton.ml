@@ -269,9 +269,9 @@ let number_of_cells nbAlive listSelectedCell =
     | h::t -> if(nbAlive = h) then true 
               else aux t 
   in aux listSelectedCell;;
-  
+
 (* game of life with custom rules *)
-let gameOfLifeCustom symbol listOfNeighborsSymbols listOfState listSelectedCell =
+let gameOfLifeCustom symbol listOfNeighborsSymbols listOfState listCheckedAlive listCheckedDead  =
   let rec auxNbAliveNeighbors neighbors res =
     match neighbors with
       | [] -> res
@@ -282,13 +282,13 @@ let gameOfLifeCustom symbol listOfNeighborsSymbols listOfState listSelectedCell 
                                       )
   in let nbAliveN = auxNbAliveNeighbors listOfNeighborsSymbols 0 in
     match symbol with
-      | Aliv -> if number_of_cells nbAliveN listSelectedCell then Aliv else Dead
-      | Dead -> if number_of_cells nbAliveN listSelectedCell then Aliv else Dead;;
+      | Aliv -> if number_of_cells nbAliveN listCheckedAlive then Aliv else Dead
+      | Dead -> if number_of_cells nbAliveN listCheckedDead then Aliv else Dead;;
 
 
-  let nextStepCustom listOfState transitionFonction calculateNeighbors dimension listSelectedCell = 
+  let nextStepCustom listOfState transitionFonction calculateNeighbors dimension listCheckedAlive listCheckedDead  = 
   let rec aux currentList currentCoord result =
     match currentList with
       | [] -> result
-      | h::t -> aux t (currentCoord+1) (result@(transitionFonction h (calculateNeighbors dimension currentCoord) listOfState listSelectedCell)::[])
+      | h::t -> aux t (currentCoord+1) (result@(transitionFonction h (calculateNeighbors dimension currentCoord) listOfState listCheckedAlive listCheckedDead )::[])
   in aux listOfState 1 [];;

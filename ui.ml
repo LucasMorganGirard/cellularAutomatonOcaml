@@ -9,10 +9,12 @@ let dimensionGUI = {numberOfDimention=2; cellPerSide=30::30::[]};;
 Random.init;;
 
 let s = 20;;
+
 let x_size_side = 
   match dimensionGUI.cellPerSide with
     | x::y::[] -> (x*s+20)-100
     | _ -> failwith "Wrong format";;
+
 let y_size_side = 
   match dimensionGUI.cellPerSide with
     | x::y::[] -> (y*s+20)-100
@@ -87,20 +89,16 @@ let draw_gameOfLife ruban =
 
 
 (* game of life with a list of a number of cell to be equals to *)
-  let draw_gameOfLifeCustom ruban nbCell =
+  let draw_gameOfLifeCustom ruban listCheckedAlive listCheckedDead =
   let rec aux currentRuban =
     draw_matrice currentRuban;
-    let nextIt = nextStepCustom currentRuban gameOfLifeCustom diagonalNeighbords dimensionGUI nbCell in
+    let nextIt = nextStepCustom currentRuban gameOfLifeCustom diagonalNeighbords dimensionGUI listCheckedAlive listCheckedDead in
     let e = wait_next_event [Key_pressed] in
     if e.keypressed then
       match e.key with
       | 'q' -> close_graph ();
       | _ -> aux nextIt
   in aux ruban;;
-
-(* draw_gameOfLife create_rubanStartGUI;;
-
-close_graph () *)
 
 
 
@@ -119,7 +117,7 @@ let create_checkbox x y =
   in place_box x 0
 ;;
 
-(* get the coor of the box in a list *)
+(* get the coor of the box x position in a list *)
 let checkbox_coord x = 
     let rec place_box x i list =
     if(i < 9) then 
@@ -142,38 +140,52 @@ let check_mouse_clicked x y coor_box_x box_y =
 
 
 (* allow the user to click on box *)
-let rec event_loop x y listBoxCoord listChecked =
+let rec event_loop x y listBoxCoord listCheckedAlive listCheckedDead =
     if button_down () then  
         let x_mouse, y_mouse = mouse_pos () in
-        let inBox, x_box, ind = check_mouse_clicked x_mouse y_mouse listBoxCoord y in 
+        let inBox1, x_box1, ind1 = check_mouse_clicked x_mouse y_mouse listBoxCoord y in 
+        let inBox2, x_box2, ind2 = check_mouse_clicked x_mouse y_mouse listBoxCoord (y-100) in 
         
-            if(inBox) then begin 
-                let list = ind::listChecked in 
-                fill_rect x_box y s s; 
-                event_loop x y listBoxCoord list
+            if(inBox1) then begin 
+                let list = ind1::listCheckedAlive in
+                fill_rect x_box1 y s s; 
+                event_loop x y listBoxCoord list listCheckedDead
             end
-            else begin event_loop x y listBoxCoord listChecked
+            else if(inBox2) then begin 
+                let list = ind2::listCheckedDead in 
+                fill_rect x_box2 (y-100) s s; 
+                event_loop x y listBoxCoord listCheckedAlive list 
+            end
+            else begin event_loop x y listBoxCoord listCheckedAlive listCheckedDead
             end
     else 
             if key_pressed () then
-                if(read_key () = 'c') then (* press c for custom version *)
-                    draw_gameOfLifeCustom create_rubanStartGUI listChecked
+                if(read_key () = 'c') then  (* press c for custom version *)
+                    draw_gameOfLifeCustom create_rubanStartGUI listCheckedAlive listCheckedDead 
                 else 
                     draw_gameOfLife create_rubanStartGUI
             else 
-                event_loop x y listBoxCoord listChecked;;
+                event_loop x y listBoxCoord listCheckedAlive listCheckedDead;;
 
-let menu_game = 
+let game = 
     moveto (x_size_side/2) ((y_size_side/2)+250);
     draw_string "GAME OF LIFE";
+
+    moveto (x_size_side/6) ((y_size_side/2)+200);
+    draw_string "Command : n -> next ; q -> quit ; r -> reset ; c -> start custom ";
     
     let x = x_size_side/4 in 
-    let y = y_size_side/3 in 
+    let y = y_size_side/2 in 
+    moveto x (y+50);
+    draw_string "Number of neighbors for Alive cells to stay alive";
     create_checkbox x y;
+    moveto x (y-50);
+    draw_string "Number of neighbors for Dead cells to become alive";
+    create_checkbox x (y-100); 
 
     let listBoxCoord = checkbox_coord x in 
-    event_loop x y listBoxCoord []; 
+    event_loop x y listBoxCoord [] []; 
 ;;
 
-menu_game;;
+game;;
 
