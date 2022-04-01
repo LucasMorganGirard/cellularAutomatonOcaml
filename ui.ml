@@ -5,7 +5,7 @@ open CellularAutomaton;;
 (*
   DIMENSIONS: You can change cellPerSide values to change width and height of display
 *)
-let dimensionGUI = {numberOfDimention=2; cellPerSide=45::45::[]};;
+let dimensionGUI = {numberOfDimention=2; cellPerSide=30::30::[]};;
 
 let s = 20;;
 
@@ -29,17 +29,26 @@ let lunchWindow () =
     | _ -> failwith "Wrong format";;
 
 
+(*******************************)
 (*
-  Two fonctions drawing rectangles at given coordonates of size 10*10 for the game of life.
+  Every one of the following method needs a valid instance of lunchWindow ()
 *)
 
+(*
+  int -> int -> unit
+  Two fonctions drawing rectangles at given coordonates of size 10*10 for the game of life.
+*)
 let draw_alive x y = fill_rect x y s s;;
 let draw_dead x y = draw_rect x y s s;;
 
 (*
-  Create a blank ruban for the game of life.
+  unit -> alphabet list
+  Create a random 1D ruban of alphabet sypmbol (states) for the game of life.
+
+  EXTERNAL METHODS:
+  Uses dimensionGUI as a global variable and as the reference to the dimensions of the ruban.
 *)
-let create_rubanStartGUI =
+let create_rubanStartGUI () =
   let width = match dimensionGUI.cellPerSide with
                 | width::height::[] -> width
                 | _ -> failwith "Wrong dimension" in
@@ -61,13 +70,28 @@ let create_rubanStartGUI =
   in aux [] 1;;
 
 (*
-  Draw given ruban for game of life
+  unit -> unit
+  Remove all key stacked up in the list of keys pressed.
+  Stop keys from staking up if one key stay pushed down.
+*)
+let rec flushKeyPressed () =
+  if key_pressed () then
+    let _ = read_key () in flushKeyPressed ();;
+
+(*
+  alphabet list -> unit
+  Draw given 1D ruban of alphabet sypmbol (states).
+  Ruban is 1D list but represente a 2D matrice.
+
+  EXTERNAL METHODS:
+  Uses draw_alive and draw_dead to draw the different states of the ruban of alphabet symbols at given coordonate.
+  Uses dimensionGUI as a global variable and as the reference to the dimensions of the ruban.
 *)
 let draw_matrice ruban =
   clear_graph ();
   let width = match dimensionGUI.cellPerSide with
                     | width::height::[] -> width
-                    | _ -> failwith "Wrong dimension" in
+                    | _ -> failwith "Wrong ruban dimension" in
   let rec aux x y currentRub =
     match currentRub with
       | [] -> ()
@@ -77,30 +101,58 @@ let draw_matrice ruban =
           | Dead -> draw_dead (x*s) (y*s); if x+1>width then aux 1 (y+1) t else aux (x+1) y t
   in aux 1 1 ruban;;
 
-let draw_gameOfLife ruban =
+(*
+  unit -> unit
+  Play a game of life, depending on user input.
+
+  EXTERNAL METHODS:
+  Uses draw_matrice to draw the ruban of alphabet symbols (states).
+  Uses next_step to apply the transformation rules to the ruban.
+  Uses flushKeyPressed to decrease input lag when a key have been pressed multiple times in a raw.
+  Uses create_rubanStartGUI to create the original random ruban of alphabet symbols (states).
+  Uses coordonateInsideDimension to check if coordonate clicked on correspond to a symbol in the ruban.
+  Uses inverseState to inverse the state of the symbol that was clicked on.
+  Uses dimensionGUI as a global variable and as the reference to the dimensions of the ruban.
+
+  n -> next step of algorithm
+  q -> quit
+  r -> reset board to initial state
+  click on cell -> inverse cell state
+  *)
+let draw_gameOfLife () =
   let rec aux currentRuban =
     draw_matrice currentRuban;
     let nextIt = nextStep currentRuban gameOfLife diagonalNeighbords dimensionGUI in
-    let e = wait_next_event [Key_pressed] in
-    if e.keypressed then
-      match e.key with
-      | 'q' -> close_graph ();
-      | 'r' -> aux create_rubanStartGUI
-      | _ -> aux nextIt
-  in aux ruban;;
+        let rec key () =
+        let e = wait_next_event [Button_down; Key_pressed] in
+            if e.keypressed then
+                match e.key with
+                | 'q' -> flushKeyPressed (); close_graph ();
+                | 'r' -> flushKeyPressed (); aux (create_rubanStartGUI ())
+                | _ -> flushKeyPressed (); aux nextIt
+            else
+            if e.button then
+                begin
+                let clickCoordonate = ((e.mouse_x-s)/s+1)::((e.mouse_y-s)/s+1)::[] in
+                    if coordonateInsideDimension dimensionGUI clickCoordonate then
+                    aux (inverseState (matriceCoordonateToFlatCoordonate dimensionGUI clickCoordonate) currentRuban)
+                    else key ()
+                end
+        in key ()
+    in aux (create_rubanStartGUI ());;
 
 
 (* game of life with a list of a number of cell to be equals to *)
-  let draw_gameOfLifeCustom ruban listCheckedAlive listCheckedDead =
+  let draw_gameOfLifeCustom listCheckedAlive listCheckedDead =
   let rec aux currentRuban =
     draw_matrice currentRuban;
     let nextIt = nextStepCustom currentRuban gameOfLifeCustom diagonalNeighbords dimensionGUI listCheckedAlive listCheckedDead in
     let e = wait_next_event [Key_pressed] in
-    if e.keypressed then
-      match e.key with
-      | 'q' -> close_graph ();
-      | _ -> aux nextIt
-  in aux ruban;;
+      if e.keypressed then
+        match e.key with
+        | 'q' -> close_graph ();
+        | _ -> aux nextIt
+  in aux (create_rubanStartGUI ());;
 
 
 
@@ -166,18 +218,18 @@ let rec event_loop x y listBoxCoord listCheckedAlive listCheckedDead =
     else 
             if key_pressed () then
                 if(read_key () = 'c') then  (* press c for custom version *)
-                    draw_gameOfLifeCustom create_rubanStartGUI listCheckedAlive listCheckedDead 
+                    draw_gameOfLifeCustom listCheckedAlive listCheckedDead 
                 else 
-                    draw_gameOfLife create_rubanStartGUI
+                    draw_gameOfLife ()
             else 
                 event_loop x y listBoxCoord listCheckedAlive listCheckedDead;;
 
-let game = 
+let game () = 
     moveto (x_size_side/2) ((y_size_side/2)+250);
     draw_string "GAME OF LIFE";
 
     moveto (x_size_side/6) ((y_size_side/2)+200);
-    draw_string "Command : n -> next ; q -> quit ; r -> reset ; c -> start custom game ";
+    draw_string "Command : q -> quit ; r -> reset ; c -> start custom game ";
     
     moveto (x_size_side/6) ((y_size_side/2)+150);
     draw_string "Press any key to start a classic game";
@@ -199,5 +251,4 @@ let game =
     event_loop x y listBoxCoord [] []; 
 ;;
 
-game;;
 

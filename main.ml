@@ -1,8 +1,8 @@
 open CellularAutomaton;;
-open GUI;;
+open UI;;
 
 (*
   Launch a game of life instance.
 *)
 lunchWindow ();;
-draw_gameOfLife ();;
+game ();;
