@@ -6,7 +6,6 @@ open CellularAutomaton;;
   DIMENSIONS: You can change cellPerSide values to change width and height of display
 *)
 let dimensionGUI = {numberOfDimention=2; cellPerSide=45::45::[]};;
-Random.init;;
 
 let s = 20;;
 
@@ -24,9 +23,11 @@ let y_size_side =
   Open windows with appropriate size to accomodate cellPerSide of dimensionGUI
   +100+100 represent windows offset from border of screen
 *)
-match dimensionGUI.cellPerSide with
-  | x::y::[] -> open_graph (" "^(string_of_int (x*s+20))^"x"^(string_of_int (y*s+20))^"+100+100")
-  | _ -> failwith "Wrong format";;
+let lunchWindow () =
+  match dimensionGUI.cellPerSide with
+    | x::y::[] -> open_graph (" "^(string_of_int (x*s+20))^"x"^(string_of_int (y*s+20))^"+100+100")
+    | _ -> failwith "Wrong format";;
+
 
 (*
   Two fonctions drawing rectangles at given coordonates of size 10*10 for the game of life.
@@ -84,6 +85,7 @@ let draw_gameOfLife ruban =
     if e.keypressed then
       match e.key with
       | 'q' -> close_graph ();
+      | 'r' -> aux create_rubanStartGUI
       | _ -> aux nextIt
   in aux ruban;;
 
