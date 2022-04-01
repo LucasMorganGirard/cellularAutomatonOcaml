@@ -1,5 +1,5 @@
 open CellularAutomaton;;
-open UI;;
+open GUI;;
 
 (*
   Launch a game of life instance.
