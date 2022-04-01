@@ -102,18 +102,6 @@ let draw_gameOfLife ruban =
 
 close_graph () *)
 
-let match_input_user e = 
-  match e with 
-  | '1' -> 1
-  | '2' -> 2
-  | '3' -> 3
-  | '4' -> 4
-  | '5' -> 5
-  | '6' -> 6
-  | '7' -> 7
-  | '8' -> 8
-  | _ -> 0;;
-
 
 
 (* place the checkbox in the graph *)
@@ -160,9 +148,8 @@ let rec event_loop x y listBoxCoord listChecked =
         let inBox, x_box, ind = check_mouse_clicked x_mouse y_mouse listBoxCoord y in 
         
             if(inBox) then begin 
-                let list = (List.nth listBoxCoord ind)::listChecked in (*  recup pas le bon indice logique *)
+                let list = ind::listChecked in 
                 fill_rect x_box y s s; 
-                print_int ind;
                 event_loop x y listBoxCoord list
             end
             else begin event_loop x y listBoxCoord listChecked
