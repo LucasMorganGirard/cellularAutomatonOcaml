@@ -137,7 +137,7 @@ let checkbox_coord x =
     if(i < 9) then 
         let listBox = x::list in
         place_box (x+50) (i+1) listBox
-    else list;
+    else List.rev list;
     in place_box x 0 []
 ;;
 
