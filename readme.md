@@ -1,3 +1,5 @@
+university Project
+
 COMPILE :
     ocamlfind ocamlc CellularAutomaton.ml GUI.ml main.ml -o a.out -linkpkg -package graphics
 
